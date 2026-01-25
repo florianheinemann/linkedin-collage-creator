@@ -319,6 +319,96 @@ const TEMPLATES = [
     }
   },
 
+  // Template 3d: Kralle (6 images) - 2 rows, 3 columns with angled vertical separators
+  {
+    id: 'kralle',
+    name: 'Kralle',
+    minImages: 6,
+    maxImages: 6,
+    getRegions: (imageCount) => {
+      const b = BORDER_WIDTH;
+      const splitY = 600; // Horizontal row split
+      const angleOffset = 80; // How much the vertical separators angle inward at the middle
+
+      // Column base positions at the horizontal split
+      const col1Mid = 400;
+      const col2Mid = 800;
+
+      // Top row: angles point RIGHT (line goes from wider at top to narrower at middle)
+      const col1Top = col1Mid + angleOffset; // At y=0, shifted RIGHT
+      const col2Top = col2Mid + angleOffset; // At y=0, shifted RIGHT
+
+      // Bottom row: angles point RIGHT (line goes from narrower at middle to wider at bottom)
+      const col1Bot = col1Mid + angleOffset; // At y=CANVAS_SIZE, shifted RIGHT
+      const col2Bot = col2Mid + angleOffset; // At y=CANVAS_SIZE, shifted RIGHT
+
+      const regions = [
+        // Top-left cell: right edge points right (wider at top, narrower at middle)
+        {
+          clip: [
+            { x: 0, y: 0 },
+            { x: col1Top, y: 0 },
+            { x: col1Mid, y: splitY },
+            { x: 0, y: splitY }
+          ],
+          bounds: { x: 0, y: 0, w: col1Top, h: splitY }
+        },
+        // Top-middle cell
+        {
+          clip: [
+            { x: col1Top + b, y: 0 },
+            { x: col2Top, y: 0 },
+            { x: col2Mid, y: splitY },
+            { x: col1Mid + b, y: splitY }
+          ],
+          bounds: { x: col1Mid + b, y: 0, w: col2Top - col1Mid - b, h: splitY }
+        },
+        // Top-right cell
+        {
+          clip: [
+            { x: col2Top + b, y: 0 },
+            { x: CANVAS_SIZE, y: 0 },
+            { x: CANVAS_SIZE, y: splitY },
+            { x: col2Mid + b, y: splitY }
+          ],
+          bounds: { x: col2Mid + b, y: 0, w: CANVAS_SIZE - col2Mid - b, h: splitY }
+        },
+        // Bottom-left cell
+        {
+          clip: [
+            { x: 0, y: splitY + b },
+            { x: col1Mid, y: splitY + b },
+            { x: col1Bot, y: CANVAS_SIZE },
+            { x: 0, y: CANVAS_SIZE }
+          ],
+          bounds: { x: 0, y: splitY + b, w: col1Bot, h: CANVAS_SIZE - splitY - b }
+        },
+        // Bottom-middle cell
+        {
+          clip: [
+            { x: col1Mid + b, y: splitY + b },
+            { x: col2Mid, y: splitY + b },
+            { x: col2Bot, y: CANVAS_SIZE },
+            { x: col1Bot + b, y: CANVAS_SIZE }
+          ],
+          bounds: { x: col1Mid + b, y: splitY + b, w: col2Bot - col1Mid - b, h: CANVAS_SIZE - splitY - b }
+        },
+        // Bottom-right cell
+        {
+          clip: [
+            { x: col2Mid + b, y: splitY + b },
+            { x: CANVAS_SIZE, y: splitY + b },
+            { x: CANVAS_SIZE, y: CANVAS_SIZE },
+            { x: col2Bot + b, y: CANVAS_SIZE }
+          ],
+          bounds: { x: col2Mid + b, y: splitY + b, w: CANVAS_SIZE - col2Mid - b, h: CANVAS_SIZE - splitY - b }
+        }
+      ];
+
+      return regions;
+    }
+  },
+
   // Template 4: Dynamic Grid (5-6 images)
   {
     id: 'dynamic-grid',
