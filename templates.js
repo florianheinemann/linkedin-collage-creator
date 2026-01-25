@@ -96,19 +96,19 @@ const TEMPLATES = [
         const x = col * (cellWidth + b);
         const y = heroHeight + b + row * (cellHeight + b);
 
-        // Calculate angled top for first row
-        const topY1 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * x / CANVAS_SIZE) : y;
-        const topY2 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * (x + cellWidth) / CANVAS_SIZE) : y;
-        const minY = Math.min(topY1, topY2) + b;
+        // Calculate angled top for first row, straight top for other rows
+        const topY1 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * x / CANVAS_SIZE) + b : y;
+        const topY2 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * (x + cellWidth) / CANVAS_SIZE) + b : y;
+        const minY = Math.min(topY1, topY2);
 
         regions.push({
           clip: [
-            { x: x, y: topY1 + b },
-            { x: x + cellWidth, y: topY2 + b },
+            { x: x, y: topY1 },
+            { x: x + cellWidth, y: topY2 },
             { x: x + cellWidth, y: y + cellHeight },
             { x: x, y: y + cellHeight }
           ],
-          bounds: { x: x, y: row === 0 ? minY : y, w: cellWidth, h: y + cellHeight - (row === 0 ? minY : y) }
+          bounds: { x: x, y: minY, w: cellWidth, h: y + cellHeight - minY }
         });
       }
 
@@ -127,28 +127,36 @@ const TEMPLATES = [
       const splitY = 750;
       const diagonalOffset = 300;
 
+      // Calculate diagonal gap to achieve visually consistent border width
+      // Diagonal slope = splitY / (diagonalOffset * 2) = 750/600 = 1.25
+      // For perpendicular gap of b, horizontal offset = b * sqrt(1 + slope²) ≈ b * 1.6
+      const diagGap = Math.round(b * 1.6);
+
+      const diagTopLeft = CANVAS_SIZE - diagonalOffset;
+      const diagBottomLeft = diagonalOffset;
+      const diagTopRight = diagTopLeft + diagGap;
+      const diagBottomRight = diagBottomLeft + diagGap;
+
       const regions = [
         // Region 1: Top-left hero
-        // Bounds extend to cover the full diagonal clip area
         {
           clip: [
             { x: 0, y: 0 },
-            { x: CANVAS_SIZE - diagonalOffset, y: 0 },
-            { x: diagonalOffset, y: splitY - b / 2 },
-            { x: 0, y: splitY - b / 2 }
+            { x: diagTopLeft, y: 0 },
+            { x: diagBottomLeft, y: splitY },
+            { x: 0, y: splitY }
           ],
-          bounds: { x: 0, y: 0, w: CANVAS_SIZE - diagonalOffset, h: splitY }
+          bounds: { x: 0, y: 0, w: diagTopLeft, h: splitY }
         },
         // Region 2: Top-right hero
-        // Bounds start at the leftmost point of the diagonal
         {
           clip: [
-            { x: CANVAS_SIZE - diagonalOffset + b * 2, y: 0 },
+            { x: diagTopRight, y: 0 },
             { x: CANVAS_SIZE, y: 0 },
-            { x: CANVAS_SIZE, y: splitY - b / 2 },
-            { x: diagonalOffset + b * 2, y: splitY - b / 2 }
+            { x: CANVAS_SIZE, y: splitY },
+            { x: diagBottomRight, y: splitY }
           ],
-          bounds: { x: diagonalOffset + b * 2, y: 0, w: CANVAS_SIZE - diagonalOffset - b * 2, h: splitY }
+          bounds: { x: diagBottomRight, y: 0, w: CANVAS_SIZE - diagBottomRight, h: splitY }
         }
       ];
 
@@ -160,8 +168,8 @@ const TEMPLATES = [
         const x = i * (cellWidth + b);
         regions.push({
           clip: [
-            { x: x, y: splitY + b / 2 },
-            { x: x + cellWidth, y: splitY + b / 2 },
+            { x: x, y: splitY + b },
+            { x: x + cellWidth, y: splitY + b },
             { x: x + cellWidth, y: CANVAS_SIZE },
             { x: x, y: CANVAS_SIZE }
           ],
@@ -173,11 +181,11 @@ const TEMPLATES = [
     }
   },
 
-  // Template 4: Dynamic Grid (4-6 images)
+  // Template 4: Dynamic Grid (5-6 images)
   {
     id: 'dynamic-grid',
     name: 'Dynamic Grid',
-    minImages: 4,
+    minImages: 5,
     maxImages: 6,
     getRegions: (imageCount) => {
       const b = BORDER_WIDTH;
