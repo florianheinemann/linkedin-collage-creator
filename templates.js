@@ -181,6 +181,144 @@ const TEMPLATES = [
     }
   },
 
+  // Template 3b: Diagonal Split Subtle (3-4 images) - less extreme angle
+  {
+    id: 'diagonal-split-subtle',
+    name: 'Diagonal Subtle',
+    minImages: 3,
+    maxImages: 4,
+    getRegions: (imageCount) => {
+      const b = BORDER_WIDTH;
+      const splitY = 750;
+      const diagonalOffset = 480; // Gentler angle than standard (300)
+
+      // Calculate diagonal gap for visually consistent border width
+      const slope = splitY / (diagonalOffset * 2);
+      const diagGap = Math.round(b * Math.sqrt(1 + slope * slope));
+
+      const diagTopLeft = CANVAS_SIZE - diagonalOffset;
+      const diagBottomLeft = diagonalOffset;
+      const diagTopRight = diagTopLeft + diagGap;
+      const diagBottomRight = diagBottomLeft + diagGap;
+
+      const regions = [
+        // Region 1: Top-left hero
+        {
+          clip: [
+            { x: 0, y: 0 },
+            { x: diagTopLeft, y: 0 },
+            { x: diagBottomLeft, y: splitY },
+            { x: 0, y: splitY }
+          ],
+          bounds: { x: 0, y: 0, w: diagTopLeft, h: splitY }
+        },
+        // Region 2: Top-right hero
+        {
+          clip: [
+            { x: diagTopRight, y: 0 },
+            { x: CANVAS_SIZE, y: 0 },
+            { x: CANVAS_SIZE, y: splitY },
+            { x: diagBottomRight, y: splitY }
+          ],
+          bounds: { x: diagBottomRight, y: 0, w: CANVAS_SIZE - diagBottomRight, h: splitY }
+        }
+      ];
+
+      const bottomCount = imageCount - 2;
+      const cellWidth = (CANVAS_SIZE - (bottomCount - 1) * b) / bottomCount;
+      const bottomHeight = CANVAS_SIZE - splitY - b;
+
+      for (let i = 0; i < bottomCount; i++) {
+        const x = i * (cellWidth + b);
+        regions.push({
+          clip: [
+            { x: x, y: splitY + b },
+            { x: x + cellWidth, y: splitY + b },
+            { x: x + cellWidth, y: CANVAS_SIZE },
+            { x: x, y: CANVAS_SIZE }
+          ],
+          bounds: { x: x, y: splitY + b, w: cellWidth, h: bottomHeight }
+        });
+      }
+
+      return regions;
+    }
+  },
+
+  // Template 3c: Diagonal Split Double (4 images) - angled top and bottom separators
+  {
+    id: 'diagonal-split-double',
+    name: 'Diagonal Double',
+    minImages: 4,
+    maxImages: 4,
+    getRegions: (imageCount) => {
+      const b = BORDER_WIDTH;
+      const splitY = 700;
+      const diagonalOffset = 450; // Gentler angle
+
+      // Calculate diagonal gap for visually consistent border width
+      const slope = splitY / (diagonalOffset * 2);
+      const diagGap = Math.round(b * Math.sqrt(1 + slope * slope));
+
+      // Top diagonal: left-to-right downward slope
+      const topDiagTopLeft = CANVAS_SIZE - diagonalOffset;
+      const topDiagBottomLeft = diagonalOffset;
+      const topDiagTopRight = topDiagTopLeft + diagGap;
+      const topDiagBottomRight = topDiagBottomLeft + diagGap;
+
+      // Bottom diagonal: opposite direction (right-to-left downward slope)
+      const bottomHeight = CANVAS_SIZE - splitY - b;
+      const bottomDiagOffset = 450; // Gentler angle, opposite direction
+      const bottomSlope = bottomHeight / (bottomDiagOffset * 2);
+      const bottomDiagGap = Math.round(b * Math.sqrt(1 + bottomSlope * bottomSlope));
+
+      const regions = [
+        // Region 1: Top-left hero
+        {
+          clip: [
+            { x: 0, y: 0 },
+            { x: topDiagTopLeft, y: 0 },
+            { x: topDiagBottomLeft, y: splitY },
+            { x: 0, y: splitY }
+          ],
+          bounds: { x: 0, y: 0, w: topDiagTopLeft, h: splitY }
+        },
+        // Region 2: Top-right hero
+        {
+          clip: [
+            { x: topDiagTopRight, y: 0 },
+            { x: CANVAS_SIZE, y: 0 },
+            { x: CANVAS_SIZE, y: splitY },
+            { x: topDiagBottomRight, y: splitY }
+          ],
+          bounds: { x: topDiagBottomRight, y: 0, w: CANVAS_SIZE - topDiagBottomRight, h: splitY }
+        },
+        // Region 3: Bottom-left (opposite angle)
+        {
+          clip: [
+            { x: 0, y: splitY + b },
+            { x: bottomDiagOffset, y: splitY + b },
+            { x: CANVAS_SIZE - bottomDiagOffset, y: CANVAS_SIZE },
+            { x: 0, y: CANVAS_SIZE }
+          ],
+          bounds: { x: 0, y: splitY + b, w: CANVAS_SIZE - bottomDiagOffset, h: bottomHeight }
+        },
+        // Region 4: Bottom-right (opposite angle)
+        {
+          clip: [
+            { x: bottomDiagOffset + bottomDiagGap, y: splitY + b },
+            { x: CANVAS_SIZE, y: splitY + b },
+            { x: CANVAS_SIZE, y: CANVAS_SIZE },
+            { x: CANVAS_SIZE - bottomDiagOffset + bottomDiagGap, y: CANVAS_SIZE }
+          ],
+          bounds: { x: bottomDiagOffset + bottomDiagGap, y: splitY + b, w: CANVAS_SIZE - bottomDiagOffset - bottomDiagGap, h: bottomHeight }
+        }
+      ];
+
+      return regions;
+    }
+  },
+
   // Template 4: Dynamic Grid (5-6 images)
   {
     id: 'dynamic-grid',
