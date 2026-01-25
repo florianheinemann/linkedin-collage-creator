@@ -22,6 +22,7 @@ const TEMPLATES = [
 
       const regions = [
         // Region 1: Large left hero (angled right edge)
+        // Bounds extend to cover the full angled clip area
         {
           clip: [
             { x: 0, y: 0 },
@@ -29,7 +30,7 @@ const TEMPLATES = [
             { x: leftWidth - angleOffset, y: CANVAS_SIZE },
             { x: 0, y: CANVAS_SIZE }
           ],
-          bounds: { x: 0, y: 0, w: leftWidth, h: CANVAS_SIZE }
+          bounds: { x: 0, y: 0, w: leftWidth + angleOffset, h: CANVAS_SIZE }
         }
       ];
 
@@ -40,6 +41,7 @@ const TEMPLATES = [
         const y = i * (rightHeight + b);
         const topAngle = leftWidth + angleOffset - (angleOffset * 2 * y / CANVAS_SIZE);
         const bottomAngle = leftWidth + angleOffset - (angleOffset * 2 * (y + rightHeight) / CANVAS_SIZE);
+        const minX = Math.min(topAngle, bottomAngle) + b;
 
         regions.push({
           clip: [
@@ -48,7 +50,7 @@ const TEMPLATES = [
             { x: CANVAS_SIZE, y: y + rightHeight },
             { x: bottomAngle + b, y: y + rightHeight }
           ],
-          bounds: { x: leftWidth + b, y: y, w: rightWidth, h: rightHeight }
+          bounds: { x: minX, y: y, w: CANVAS_SIZE - minX, h: rightHeight }
         });
       }
 
@@ -70,6 +72,7 @@ const TEMPLATES = [
 
       const regions = [
         // Region 1: Large top hero (angled bottom edge)
+        // Bounds extend to cover the full angled clip area
         {
           clip: [
             { x: 0, y: 0 },
@@ -77,7 +80,7 @@ const TEMPLATES = [
             { x: CANVAS_SIZE, y: heroHeight - angleOffset },
             { x: 0, y: heroHeight + angleOffset }
           ],
-          bounds: { x: 0, y: 0, w: CANVAS_SIZE, h: heroHeight }
+          bounds: { x: 0, y: 0, w: CANVAS_SIZE, h: heroHeight + angleOffset }
         }
       ];
 
@@ -94,9 +97,9 @@ const TEMPLATES = [
         const y = heroHeight + b + row * (cellHeight + b);
 
         // Calculate angled top for first row
-        const topY = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * (x + cellWidth / 2) / CANVAS_SIZE) : y;
-        const topY2 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * (x + cellWidth) / CANVAS_SIZE) : y;
         const topY1 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * x / CANVAS_SIZE) : y;
+        const topY2 = row === 0 ? heroHeight + angleOffset - (angleOffset * 2 * (x + cellWidth) / CANVAS_SIZE) : y;
+        const minY = Math.min(topY1, topY2) + b;
 
         regions.push({
           clip: [
@@ -105,7 +108,7 @@ const TEMPLATES = [
             { x: x + cellWidth, y: y + cellHeight },
             { x: x, y: y + cellHeight }
           ],
-          bounds: { x: x, y: y, w: cellWidth, h: cellHeight }
+          bounds: { x: x, y: row === 0 ? minY : y, w: cellWidth, h: y + cellHeight - (row === 0 ? minY : y) }
         });
       }
 
@@ -126,6 +129,7 @@ const TEMPLATES = [
 
       const regions = [
         // Region 1: Top-left hero
+        // Bounds extend to cover the full diagonal clip area
         {
           clip: [
             { x: 0, y: 0 },
@@ -136,6 +140,7 @@ const TEMPLATES = [
           bounds: { x: 0, y: 0, w: CANVAS_SIZE - diagonalOffset, h: splitY }
         },
         // Region 2: Top-right hero
+        // Bounds start at the leftmost point of the diagonal
         {
           clip: [
             { x: CANVAS_SIZE - diagonalOffset + b * 2, y: 0 },
@@ -143,7 +148,7 @@ const TEMPLATES = [
             { x: CANVAS_SIZE, y: splitY - b / 2 },
             { x: diagonalOffset + b * 2, y: splitY - b / 2 }
           ],
-          bounds: { x: diagonalOffset, y: 0, w: CANVAS_SIZE - diagonalOffset, h: splitY }
+          bounds: { x: diagonalOffset + b * 2, y: 0, w: CANVAS_SIZE - diagonalOffset - b * 2, h: splitY }
         }
       ];
 
@@ -210,6 +215,7 @@ const TEMPLATES = [
         const midY = topHeight + b;
         regions.push(
           // Region 3: Middle-left
+          // Bounds extend to cover the full angled clip area
           {
             clip: [
               { x: 0, y: midY },
@@ -217,9 +223,10 @@ const TEMPLATES = [
               { x: midX - angleOffset, y: midY + midHeight },
               { x: 0, y: midY + midHeight }
             ],
-            bounds: { x: 0, y: midY, w: midX, h: midHeight }
+            bounds: { x: 0, y: midY, w: midX + angleOffset, h: midHeight }
           },
           // Region 4: Middle-right
+          // Bounds start at the leftmost point of the angled clip
           {
             clip: [
               { x: midX + angleOffset + b, y: midY },
@@ -227,7 +234,7 @@ const TEMPLATES = [
               { x: CANVAS_SIZE, y: midY + midHeight },
               { x: midX - angleOffset + b, y: midY + midHeight }
             ],
-            bounds: { x: midX, y: midY, w: midX, h: midHeight }
+            bounds: { x: midX - angleOffset + b, y: midY, w: CANVAS_SIZE - midX + angleOffset - b, h: midHeight }
           }
         );
       }
@@ -272,6 +279,7 @@ const TEMPLATES = [
 
       const regions = [
         // Region 1: Left top
+        // Bounds extend to cover the full angled clip area
         {
           clip: [
             { x: 0, y: 0 },
@@ -279,9 +287,10 @@ const TEMPLATES = [
             { x: leftColWidth - angleOffset, y: leftCellHeight },
             { x: 0, y: leftCellHeight }
           ],
-          bounds: { x: 0, y: 0, w: leftColWidth, h: leftCellHeight }
+          bounds: { x: 0, y: 0, w: leftColWidth + angleOffset, h: leftCellHeight }
         },
         // Region 2: Right hero (big)
+        // Bounds start at the leftmost point of the angled clip
         {
           clip: [
             { x: leftColWidth + angleOffset + b, y: 0 },
@@ -292,6 +301,7 @@ const TEMPLATES = [
           bounds: { x: leftColWidth + b, y: 0, w: rightColWidth, h: heroHeight }
         },
         // Region 3: Left middle
+        // Bounds extend to cover the full angled clip area
         {
           clip: [
             { x: 0, y: leftCellHeight + b },
@@ -299,7 +309,7 @@ const TEMPLATES = [
             { x: leftColWidth + angleOffset - b, y: leftCellHeight * 2 + b },
             { x: 0, y: leftCellHeight * 2 + b }
           ],
-          bounds: { x: 0, y: leftCellHeight + b, w: leftColWidth, h: leftCellHeight }
+          bounds: { x: 0, y: leftCellHeight + b, w: leftColWidth + angleOffset, h: leftCellHeight }
         },
         // Region 4: Left bottom
         {
