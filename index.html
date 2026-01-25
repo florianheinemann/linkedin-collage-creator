@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>LinkedIn Collage Creator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>LinkedIn Collage Creator</h1>
+      <p class="subtitle">Create stunning 1200x1200 collages for LinkedIn</p>
+    </header>
+
+    <main class="main">
+      <!-- Upload Section -->
+      <section class="section upload-section">
+        <h2>1. Add Images</h2>
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-content">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p class="upload-text">Tap to select or drag images here</p>
+            <p class="upload-hint">Supports JPG, PNG, WebP (not HEIC)</p>
+          </div>
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            class="file-input"
+          >
+        </div>
+      </section>
+
+      <!-- Image List Section -->
+      <section class="section image-list-section" id="imageListSection" hidden>
+        <h2>2. Arrange Images <span class="image-count" id="imageCount">(0)</span></h2>
+        <div class="image-list" id="imageList"></div>
+        <button class="btn btn-secondary" id="clearAllBtn">Clear All</button>
+      </section>
+
+      <!-- Template Section -->
+      <section class="section template-section" id="templateSection" hidden>
+        <h2>3. Choose Template</h2>
+        <div class="template-grid" id="templateGrid"></div>
+      </section>
+
+      <!-- Preview Section -->
+      <section class="section preview-section" id="previewSection" hidden>
+        <h2>4. Preview & Download</h2>
+        <div class="preview-container">
+          <canvas id="previewCanvas" width="1200" height="1200"></canvas>
+        </div>
+        <div class="download-actions">
+          <button class="btn btn-primary" id="downloadBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Collage
+          </button>
+          <p class="download-hint">JPEG format, optimized for LinkedIn</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Images are processed locally - nothing is uploaded to any server</p>
+    </footer>
+  </div>
+
+  <script src="templates.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
