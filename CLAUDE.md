@@ -35,4 +35,5 @@ Each template has `id`, `name`, `minImages`, `maxImages`, and `getRegions(imageC
 
 - HEIC/HEIF not supported (browser limitation) - filter with `isSupportedImage()`
 - Safari iOS requires `toDataURL()` not `toBlob()` for reliable export
+- `<a download>` is unreliable on iOS; touch devices use the Web Share API (`navigator.share({ files })`, File built synchronously to keep the user gesture), falling back to a full-screen long-press-to-save overlay
 - All image processing is client-side only

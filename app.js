@@ -570,6 +570,26 @@ function downloadCollage() {
   // Use toDataURL for Safari compatibility
   const dataUrl = state.canvas.toDataURL('image/jpeg', 0.92);
 
+  // On phones/tablets, <a download> is unreliable (iOS Safari ignores it or
+  // saves to Files instead of Photos). Prefer the native share sheet, which
+  // offers "Save Image". The File is built synchronously so the share call
+  // stays within the user gesture that iOS requires.
+  if (isTouchDevice()) {
+    const file = dataUrlToFile(dataUrl, 'linkedin-collage.jpg');
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).catch((err) => {
+        if (err.name !== 'AbortError') {
+          showSaveOverlay(dataUrl);
+        }
+      });
+      return;
+    }
+
+    // No file sharing (e.g. in-app browsers): show the image for long-press save
+    showSaveOverlay(dataUrl);
+    return;
+  }
+
   // Create download link
   const link = document.createElement('a');
   link.download = 'linkedin-collage.jpg';
@@ -579,6 +599,43 @@ function downloadCollage() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+/**
+ * Detect touch-first devices (phones, tablets incl. iPadOS)
+ */
+function isTouchDevice() {
+  return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 1;
+}
+
+/**
+ * Convert a data URL to a File synchronously
+ */
+function dataUrlToFile(dataUrl, filename) {
+  const [header, base64] = dataUrl.split(',');
+  const mime = header.match(/:(.*?);/)[1];
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new File([bytes], filename, { type: mime });
+}
+
+/**
+ * Show the collage full-screen so it can be saved via long-press
+ */
+function showSaveOverlay(dataUrl) {
+  const overlay = document.createElement('div');
+  overlay.className = 'save-overlay';
+  overlay.innerHTML = `
+    <p class="save-overlay-hint">Press and hold the image, then tap "Save to Photos"</p>
+    <img class="save-overlay-image" alt="Your collage">
+    <button class="btn btn-primary save-overlay-close" type="button">Done</button>
+  `;
+  overlay.querySelector('img').src = dataUrl;
+  overlay.querySelector('button').addEventListener('click', () => overlay.remove());
+  document.body.appendChild(overlay);
 }
 
 // Initialize when DOM is ready
